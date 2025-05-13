@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Blog Post #1</title>
+    <link rel="stylesheet" href="../stylesheets/blog.css" />
+    <script src="../javascripts/blog.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>Getting Started with Neural Style Transfer</h1>
+      <a href="../blogs.html">← Back to Blogs</a>
+    </header>
+    <main>
+      <article>
+        <p>
+          In this post, we explore how to clone handwriting using NST
+          techniques...
+        </p>
+
+        <h2>Code Example</h2>
+        <pre><code>
+import torch
+from torchvision import transforms
+# Neural Style Transfer code here
+def generate_concise_explanation(row):
+	fxn_outputs = []
+	for feature in row["SHAP_features_top_10"].split(" + "):
+		response = {}
+		if feature in function_map:
+			response = function_map[feature](row)
+			# print(response) 
+			fxn_response = FunctionResponse(
+				feature=feature,
+				explanation=feature_mapping[feature],
+				feature_value=row[feature],
+				function_output=response,
+			)
+
+			fxn_outputs.append(fxn_response)
+
+	return FinalResponse(
+		order_info=OrderInformation(
+			order_id=row["device_order_id"],
+			transaction_date=str(row["bus_date"]),
+			customer_id=row["cust_prof_id"],
+		),
+		function_response=fxn_outputs,
+	)
+    </code></pre>
+
+        <h2>Image Output</h2>
+        <img
+          src="../assets/python.jpg"
+          style="
+            width: 150px;
+            height: 200px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+          "
+          alt="NST output"
+        />
+      </article>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Blog 1 – My Portfolio</title>
+    <link rel="stylesheet" href="../stylesheets/blog.css" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <header>
+      <h1>Using GPT-4 for Sentiment Classification</h1>
+      <a href="../blogs.html">← Back to Blogs</a>
+    </header>
+    <main>
+      <article>
+        <p>
+          In this post, I describe how I built a sentiment analysis pipeline
+          using web scraping, GPT-4, and data visualization with Plotly.
+        </p>
+
+        <h2>Step 1: Web Scraping News Articles</h2>
+        <p>
+          I used Python’s <code>requests</code> and
+          <code>BeautifulSoup</code> libraries to extract content from news
+          sites.
+        </p>
+        <pre><code>
+from bs4 import BeautifulSoup
+import requests
+
+url = "https://example.com/news"
+response = requests.get(url)
+soup = BeautifulSoup(response.text, "html.parser")
+
+title = soup.find("h1").text
+content = soup.find("div", class_="article-content").text
+</code></pre>
+
+        <h2>Step 2: GPT-4 for Entity Sentiment</h2>
+        <p>
+          Using GPT-4 via OpenAI API, I classified entities with corresponding
+          sentiment.
+        </p>
+
+        <h2>Step 3: Visualizing with Plotly</h2>
+        <p>
+          Sentiment trends were plotted using Plotly bar and pie charts for easy
+          interpretation.
+        </p>
+
+        <h2>Summary</h2>
+        <p>
+          Combining LLMs and visual tools created a rich and interpretable
+          sentiment analysis workflow. Future improvements include automating
+          prompt chains and handling multilingual sources.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>
