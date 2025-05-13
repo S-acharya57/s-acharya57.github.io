@@ -23,30 +23,7 @@
 import torch
 from torchvision import transforms
 # Neural Style Transfer code here
-def generate_concise_explanation(row):
-	fxn_outputs = []
-	for feature in row["SHAP_features_top_10"].split(" + "):
-		response = {}
-		if feature in function_map:
-			response = function_map[feature](row)
-			# print(response) 
-			fxn_response = FunctionResponse(
-				feature=feature,
-				explanation=feature_mapping[feature],
-				feature_value=row[feature],
-				function_output=response,
-			)
 
-			fxn_outputs.append(fxn_response)
-
-	return FinalResponse(
-		order_info=OrderInformation(
-			order_id=row["device_order_id"],
-			transaction_date=str(row["bus_date"]),
-			customer_id=row["cust_prof_id"],
-		),
-		function_response=fxn_outputs,
-	)
     </code></pre>
 
         <h2>Image Output</h2>
