@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mandelbrot Set: Multithreading and Analysis</title>
+    <link rel="stylesheet" href="../stylesheets/blog.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+    <script src="../javascripts/blog.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div class="header-container">
+        <h1>Mandelbrot Set: Generation with Multithreading and Analysis</h1>
+        <a href="../blogs.html" class="back-link">← Back to Blogs</a>
+      </div>
+    </header>
+    <main>
+      <article>
+        <section>
+          <p>
+            The Mandelbrot set is a mesmerizing pattern of complexity derived from a simple mathematical formula. It consists of complex numbers with a unique property: they either remain confined within a boundary or diverge when plotted. To determine if a number belongs to the set, a straightforward iterative calculation is performed.
+          </p>
+        </section>
+        <section>
+          <p>
+            For any given point \( c \) on the complex plane, we start with \( z_0 = 0 \) and iteratively apply the formula:
+            \[
+            z_{n+1} = z_n^2 + c
+            \]
+            Intuitively, as \( n \) increases, the magnitude of \( z \) may grow significantly. However, computing this for each pixel in an image—say, a 3200x3200 resolution with 10.24 million pixels—requires independent, iterative calculations, which can be computationally intensive and time-consuming.
+          </p>
+        </section>
+        <section>
+          <h2>Core Mandelbrot Calculation</h2>
+          <pre><code class="language-cpp">int get_mandelbrot(double real, double imaginary)
+{
+    std::complex&lt;double&gt; c(real, imaginary);
+    std::complex&lt;double&gt; z = 0;
+
+    int iter = 0;
+
+    // The core loop!
+    while (std::abs(z) &lt;= 2.0 && iter &lt; MAX_ITER)
+    {
+        z = z * z + c;
+        iter++;
+    }
+    return iter;
+}</code></pre>
+        </section>
+        <section>
+          <p>
+            Upon analysis, it was clear that the calculation for each pixel is independent of others, making it an ideal candidate for parallelization. This independence allows us to leverage multithreading to significantly improve performance.
+          </p>
+        </section>
+        <section>
+          <p>
+            Modern CPUs have multiple cores, each capable of executing instructions independently. C++ provides access to this power through its <code>&lt;thread&gt;</code> library.
+          </p>
+        </section>
+        <section>
+          <h2>Multithreading Strategy</h2>
+          <p>The strategy for implementing multithreading is as follows:</p>
+          <ol>
+            <li>Divide the image into horizontal strips.</li>
+            <li>Assign each strip of rows to a separate thread.</li>
+            <li>Run all threads simultaneously, each computing its portion of the image.</li>
+            <li>Once all threads complete, save the final image.</li>
+          </ol>
+          <p>Each thread is assigned a starting and ending row number, applying the same pixel computation function within its range.</p>
+        </section>
+        <section>
+          <h2>Multithreaded Code Example</h2>
+          <pre><code class="language-cpp">// Each thread computes its own row range
+void compute_rows(int y_start, int y_end)
+{
+    for (int y = y_start; y &lt; y_end; ++y)
+    {
+        for (int x = 0; x &lt; WIDTH; ++x)
+        {
+            // Map pixel to complex plane
+            double real = (x - WIDTH / 2.0) * 4.0 / WIDTH;
+            double imaginary = (y - HEIGHT / 2.0) * 4.0 / WIDTH;
+
+            int iter = get_mandelbrot(real, imaginary);
+
+            // Store result in shared image data
+            image_data[y][x] = iter;
+        }
+    }
+}</code></pre>
+<p>
+  With this row computation code, each thread can contribute to the construction of the Mandelbrot image set, independently. The number of threads were increased chronologically, to see the difference of time of execution in each method. 
+
+  For each thread, it can be called as: 
+  <pre><code>
+    threads[i] = std::thread(compute_rows, y_start, y_end);
+  </code></pre>
+</p>
+<h3>Results</h3>
+<p>
+  I ran the code for my 3200x3200 image with different numbers of threads. Here are the results:
+<ul>
+<li>2 Threads: 52.40 seconds</li>
+<li>8 Threads: 35.87 seconds</li>
+<li>16 Threads: 25.71 seconds</li>
+</ul>
+The performance leap is immediate and dramatic. 
+</p>
+        </section>
+
+      </article>
+    </main>
+    <footer>
+      <p>&copy; 2025 Sajjan Acharya. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Blog Post #1</title>
+    <link rel="stylesheet" href="../stylesheets/blog.css" />
+    <script src="../javascripts/blog.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>Mandelbrot Set of Images, Generation with Multi-threading and analysis</h1>
+      <a href="../blogs.html">← Back to Blogs</a>
+    </header>
+    <main>
+      <article>
+        <p>
+          The Mandelbrot set is a beautiful pattern of complexity, from a basic mathematical formula. It is a set of complex numbers, with a special property; confined inside a boundary, or scattered away when plotted in a basic number line. In order to check if a number is in the set, a simple iterative calculation can be done. 
+        </p>
+
+        <p>
+            For any given point `c` on the complex plane, lets start with Z_0=0 and repeatedly apply the formula:
+            Z_(n+1) = (Z_n)^2 + C
+
+            In a basic thought, we can estimate that the larger the n becomes, larger the next number is going to be. But for computation of every pixel, each of them will require an independent, iterative computation. For an image of resolution 3200x3200, there are about 10.24 million pixels. And for each pixels, that many computation is not feasible, and very time consuming. 
+        </p>
+
+      <pre><code>
+int get_mandelbrot(double real, double imaginary)
+{
+    std::complex<double> c(real, imaginary);
+    std::complex<double> z = 0;
+
+    int iter = 0;
+
+    // The core loop!
+    while(std::abs(z) <= 2.0 && iter < MAX_ITER)
+    {
+        z = z*z + c;
+        iter++;
+    }
+    return iter;
+}
+    </code></pre>
+        <p>
+          But after analysis, we can understand that there is absolutely no effect of any other pixels on the calculation of a pixel. So, all those computation tasks are independent. So, it would be immensely efficient if we could execute those tasks parallely. Hence, comes the implementation of multithreading. 
+
+        </p>
+
+        <P>
+          Modern CPUs have multiple cores, each capable of executing instructions independently. C++ gives us direct access to this power through its `<thread>`library. 
+        </P>
+
+        <p>
+          The strategy followed to implement the multithreading is as follows:
+          <li>
+            <ol>Divide the image into horizontal strips.</ol>
+            <ol>Assign each strip of rows to a separate thread.</ol>
+            <ol>Let all threads un simultaneously, each calculating its portion of the image.</ol>
+            <ol>After all threads are finished computing, final image is saved.</ol>
+          </li>
+          So, with this strategy, each thread would have a starting row, and an ending row number. And for each thread, the function of computing pixels in the row is same. 
+        </p>
+        <h2>Code Example</h2>
+        <pre>
+          <code>
+// Each thread computes its own row range
+void compute_rows(int y_start, int y_end)
+{
+    for(int y=y_start; y<y_end; ++y)
+    {
+        for(int x=0; x<WIDTH; ++x)
+        {
+            // ... (The same math as before)
+            double real = (x-WIDTH / 2.0) * 4.0 / WIDTH;
+            double imaginary = (y-HEIGHT/2.0) * 4.0/WIDTH;
+
+            int iter = get_mandelbrot(real, imaginary);
+
+            // Store the result in our shared image data
+            image_data[y][x] = iter;
+        }
+    }
+}
+
+    </code>
+  </pre>
+
+        <h2>Image Output</h2>
+        <img
+          src="../assets/python.jpg"
+          style="
+            width: 150px;
+            height: 200px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+          "
+          alt="NST output"
+        />
+      </article>
+    </main>
+  </body>
+</html> -->
